@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Chủ Nghĩa Xã Hội Khoa Học</title>
+    <link rel="stylesheet" href="static/css/question.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Tektur:wght@400..900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="menu">
+            <button type="button" class="menu-item blue">10 câu</button>
+            <button type="button" class="menu-item blue">20 câu</button>
+            <button type="button" class="menu-item blue">30 câu</button>
+            <button type="button" class="menu-item blue">50 câu</button>
+            <button type="button" class="menu-item blue">100 câu</button>
+            <button type="button" class="menu-button">QUAY VỀ</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const menuItems = document.querySelectorAll(".menu-item.blue");
+            const backButton = document.querySelector(".menu-button");
+
+            function setQuestionCountCookie(count) {
+                document.cookie = `QuestionCount=${count}; path=/; max-age=86400`;
+            }
+
+            menuItems.forEach((item) => {
+                item.addEventListener("click", function () {
+                    const count = this.textContent.match(/\d+/);
+                    if (count) {
+                        setQuestionCountCookie(count[0]);
+                    }
+
+                    menuItems.forEach(el => el.classList.remove("selected"));
+                    this.classList.add("selected");
+                });
+            });
+
+            if (backButton) {
+                backButton.addEventListener("click", function () {
+                    const isChapterSet = document.cookie.split(';').some(cookie => cookie.trim().startsWith("QuestionCount="));
+                    if (!isChapterSet) {
+                        alert("Chưa chọn số câu kìa! 😐");
+                        return;
+                    }
+                    document.body.classList.add("slide-out");
+                    setTimeout(() => {
+                        window.location.href = "index.html";
+                    }, 250);
+                });
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const menuItems = document.querySelectorAll(".menu-item");
+
+            menuItems.forEach(item => {
+                item.addEventListener("click", function () {
+                    menuItems.forEach(el => el.classList.remove("selected"));
+                    this.classList.add("selected");
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,45 @@
+/* Toàn bộ trang: căn giữa nội dung */
+html, body {
+  background: url('../static/image/loading.png') no-repeat center center fixed;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Tektur', sans-serif;
+}
+
+.container {
+  /* Flexbox để căn giữa dọc + ngang */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+/* Khung bên ngoài của thanh progress */
+.progress-bar {
+  width: 400px;
+  height: 28px;               /* Tổng chiều cao khung */
+  background-color: #fff;     /* Nền trắng để thấy rõ padding */
+  border: 4px solid #2196F3;  /* Viền đậm xanh */
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-sizing: border-box;     /* Tính cả border + padding vào height */
+  padding: 2px;               /* Khoảng trắng giữa viền và thanh fill */
+  overflow: hidden;           /* Ẩn phần thừa (nếu có) */
+}
+
+/* Phần màu xanh bên trong thanh progress */
+.progress-fill {
+  width: 0%;
+  height: 100%;               /* Lấp đầy phần bên trong (trừ padding) */
+  background-color: #2196F3;
+  transition: width 0.05s linear; /* Hiệu ứng chuyển động mượt */
+  border-radius: 4px;         /* Bo góc nhẹ phía trong */
+}
+
+/* Phần hiển thị text % */
+.progress-text {
+  font-size: 20px;
+  color: #fff;
+}

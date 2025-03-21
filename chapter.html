@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Chủ Nghĩa Xã Hội Khoa Học</title>
+  <link rel="stylesheet" href="static/css/chapter.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Tektur:wght@400..900&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <div class="game-container">
+    <div class="menu">
+      <button type="button" class="menu-item blue">CHƯƠNG 1: Nhập môn Chủ nghĩa xã hội khoa học</button>
+      <button type="button" class="menu-item blue">CHƯƠNG 2: Sứ mệnh lịch sử của giai cấp công nhân</button>
+      <button type="button" class="menu-item blue">CHƯƠNG 3: Chủ nghĩa xã hội và thời kỳ đi quá độ lên chủ nghĩa xã hội</button>
+      <button type="button" class="menu-item blue">CHƯƠNG 4: Dân chủ xã hội chủ nghĩa và nhà nước xã hội chủ nghĩa</button>
+      <button type="button" class="menu-item blue">CHƯƠNG 5: Cơ cấu xã hội - giai cấp và liên minh giai cấp, tầng lớp
+        trong thời kì quá độ lên chủ nghĩa xã hội</button>
+      <button type="button" class="menu-item blue">CHƯƠNG 6: vấn đề dân tộc và tôn giáo trong thời kỳ quá độ lên Chủ
+        Nghĩa Xã Hội</button>
+      <button type="button" class="menu-item blue">CHƯƠNG 7: Vấn đề gia đình trong thời kỳ quá độ lên Chủ Nghĩa Xã Hội</button>
+
+      <button type="button" class="menu-button">QUAY VỀ</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const menuItems = document.querySelectorAll(".menu-item");
+      const backButton = document.querySelector(".menu-button");
+
+      function setChapterCookie(chapterNumber) {
+        document.cookie = `Chapter=${chapterNumber}; path=/; max-age=86400`;
+      }
+
+      menuItems.forEach((item, index) => {
+        item.addEventListener("click", function () {
+          setChapterCookie(index + 1);
+
+          menuItems.forEach(el => el.classList.remove("selected"));
+          this.classList.add("selected");
+        });
+      });
+
+      if (backButton) {
+        backButton.addEventListener("click", function () {
+          const isChapterSet = document.cookie.split(';').some(cookie => cookie.trim().startsWith("Chapter="));
+          if (!isChapterSet) {
+            alert("Chưa chọn chương kìa!");
+            return;
+          }
+          document.body.classList.add("slide-out");
+          setTimeout(() => {
+            window.location.href = "index.html";
+          }, 250);
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

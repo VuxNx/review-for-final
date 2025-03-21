@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Fake Loading Progress Bar</title>
+    <!-- Kết nối đến file CSS -->
+    <link rel="stylesheet" href="loading.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Tektur:wght@400..900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-text" id="progress-text">0%</div>
+    </div>
+
+    <!-- Code JS nhỏ để mô phỏng tăng dần từ 0% đến 100% -->
+    <script>
+        let width = 0;
+        const fillElem = document.getElementById('progress-fill');
+        const textElem = document.getElementById('progress-text');
+        wait(900);
+        function wait(ms) {
+            var d = new Date();
+            var d2 = null;
+            do { d2 = new Date(); }
+            while (d2 - d < ms);
+        }
+        // Cứ 50ms lại tăng 1%, đến 100% thì dừng
+        const interval = setInterval(() => {
+            if (width >= 100) {
+                clearInterval(interval);
+            } else {
+                width++;
+                fillElem.style.width = width + '%';
+                textElem.textContent = width + '%';
+            }
+        }, 50);
+    </script>
+</body>
+</html>

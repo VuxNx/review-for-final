@@ -1,0 +1,114 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: url('../image/bg_intro.jpg') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Tektur', sans-serif;
+}
+
+.game-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 10px;
+}
+
+
+.menu {
+  border: 4px solid #000000;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 1070px;
+  border-radius: 10px;
+}
+
+
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  outline: inherit;
+}
+
+.menu-item {
+  width: 100%;
+  text-align: left;
+  padding: 12px 15px;
+  border: 4px solid #000000;
+  font-family: 'Tektur', sans-serif;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  overflow-wrap: break-word;
+}
+
+.menu-item.blue {
+  background-color: #b3ecff;
+}
+
+.menu-item.orange {
+  background-color: #ffe2b3;
+}
+
+.menu-item.selected {
+  background-color: #ffcc99;
+}
+
+.menu-button {
+  width: 100%;
+  padding: 12px 0;
+  border: 4px solid #000000;
+  background-color: #ffe2b3;
+  text-transform: uppercase;
+  text-align: center;
+  font-family: 'Tektur', sans-serif;
+  font-size: 1.2rem;
+  border-radius: 5px;
+}
+
+.menu-button:hover {
+  filter: brightness(95%);
+}
+
+@media (max-width: 500px) {
+  .menu {
+    padding: 15px;
+    width: 95%;
+  }
+
+  .menu-item {
+    font-size: 1rem;
+    padding: 10px 0;
+  }
+
+  .menu-button {
+    font-size: 1rem;
+    padding: 10px 0;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.slide-out {
+  animation: slideOut 0.5s forwards;
+}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Chủ Nghĩa Xã Hội Khoa Học</title>
+    <link rel="stylesheet" href="static/css/intro.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Tektur:wght@400..900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="game-container">
+        <div class="menu">
+            <button type="button" class="menu-item blue">CHỌN CHƯƠNG</button>
+            <button type="button" class="menu-item blue">SỐ CÂU</button>
+            <button type="button" class="menu-item blue">THỜI GIAN</button>
+            <button type="button" class="menu-button">TIẾP THEO</button>
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const menuItems = document.querySelectorAll(".menu-item.blue");
+            const container = document.querySelector(".game-container");
+            const nextButton = document.querySelector(".menu-button"); 
+
+            function checkCookie(name) {
+                return document.cookie
+                    .split(';')
+                    .some(cookie => cookie.trim().startsWith(name + "="));
+            }
+
+            if (menuItems && container) {
+                menuItems.forEach((item) => {
+                    item.addEventListener("click", function () {
+                        let targetPage = "";
+
+                        if (item.textContent.includes("CHỌN CHƯƠNG")) {
+                            targetPage = "chapter.html";
+                        } else if (item.textContent.includes("SỐ CÂU")) {
+                            targetPage = "question.html";
+                        } else if (item.textContent.includes("THỜI GIAN")) {
+                            targetPage = "time.html";
+                        }
+
+                        if (targetPage) {
+                            container.classList.add("slide-out");
+                            setTimeout(() => {
+                                window.location.href = targetPage;
+                            }, 250);
+                        }
+                    });
+                });
+            }
+
+            if (nextButton) {
+                nextButton.addEventListener("click", function () {
+                    if (!checkCookie("Chapter")) {
+                        alert("Bạn chưa chọn Chương!");
+                        return;
+                    }
+                    if (!checkCookie("QuestionCount")) {
+                        alert("Bạn chưa chọn Số câu!");
+                        return;
+                    }
+                    if (!checkCookie("savedTime")) {
+                        alert("Bạn chưa cài đặt Thời gian!");
+                        return;
+                    }
+
+                    container.classList.add("slide-out");
+                    setTimeout(() => {
+                        window.location.href = "D:\\MCQS_WEB\\util\\loading.html";
+                    }, 250);
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
