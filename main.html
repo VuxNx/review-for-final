@@ -47,41 +47,42 @@
 
   <script>
     let questions = [];
+    let questionList = []; 
     let currentQuestionIndex = 0;
     let answers = [];
     let timeLeft = 0;
     let timerInterval;
     let totalTime = 0;
-    let isTimeUp = false; 
-  
+    let isTimeUp = false;
+
     function getCookie(name) {
       const value = `; ${document.cookie}`;
       const parts = value.split(`; ${name}=`);
       if (parts.length === 2) return parts.pop().split(';').shift();
       return null;
     }
-  
+
     function setCookie(name, value, days) {
       const date = new Date();
       date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
       const expires = `expires=${date.toUTCString()}`;
       document.cookie = `${name}=${value};${expires};path=/`;
     }
-  
+
     async function fetchQuestions() {
       try {
         const chapter = getCookie('Chapter') || '1';
         const questionCount = parseInt(getCookie('QuestionCount') || '30', 10);
-        const savedTime = parseInt(getCookie('savedTime') || '3600', 10); // Mặc định 1 giờ
-  
+        const savedTime = parseInt(getCookie('savedTime') || '3600', 10); 
+
         timeLeft = savedTime;
         totalTime = savedTime;
         updateTimer();
-  
+
         const filename = `static/question/ch${chapter}.json`;
         const response = await fetch(filename);
         const jsonData = await response.json();
-  
+
         const questionArray = [];
         for (const id in jsonData) {
           if (jsonData.hasOwnProperty(id)) {
@@ -94,10 +95,11 @@
             });
           }
         }
-  
+
         questionArray.sort(() => Math.random() - 0.5);
+
         questions = questionArray.slice(0, Math.min(questionCount, questionArray.length));
-  
+
         while (questions.length < questionCount) {
           const id = questions.length + 1;
           questions.push({
@@ -112,34 +114,38 @@
             correctAnswer: Math.floor(Math.random() * 4)
           });
         }
-  
+
+        questionList = questions.map(q => q.id);
+
+        setCookie('questionList', JSON.stringify(questionList), 1);
+
         answers = new Array(questions.length).fill(null);
-  
+
         loadAnswersFromCookie();
-  
+
         document.getElementById('totalQuestions').textContent = questions.length;
-  
+
         createTraceGrid();
-  
+
         displayQuestion(currentQuestionIndex);
-  
+
         startTimer();
       } catch (error) {
         console.error('Lỗi khi tải câu hỏi:', error);
         document.getElementById('questionContent').textContent = 'Có lỗi xảy ra khi tải câu hỏi. Vui lòng thử lại sau.';
       }
     }
-  
+
     function displayQuestion(index) {
       if (index < 0 || index >= questions.length) return;
-  
+
       const question = questions[index];
       document.getElementById('currentQuestion').textContent = index + 1;
       document.getElementById('questionContent').textContent = question.question;
-  
+
       const optionsContainer = document.getElementById('options');
       optionsContainer.innerHTML = '';
-  
+
       question.options.forEach((option, i) => {
         const optionElement = document.createElement('div');
         optionElement.className = 'option';
@@ -155,18 +161,18 @@
         });
         optionsContainer.appendChild(optionElement);
       });
-  
+
       document.getElementById('prevBtn').disabled = index === 0;
       document.getElementById('nextBtn').disabled = index === questions.length - 1;
-  
+
       updateTraceHighlight();
     }
-  
+
     function selectOption(optionIndex) {
       if (isTimeUp) return;
-  
+
       answers[currentQuestionIndex] = optionIndex;
-  
+
       const options = document.querySelectorAll('.option');
       options.forEach((option, i) => {
         option.classList.remove('selected');
@@ -174,16 +180,16 @@
           option.classList.add('selected');
         }
       });
-  
+
       updateTraceItem(currentQuestionIndex);
-  
+
       saveAnswersToCookie();
     }
-  
+
     function createTraceGrid() {
       const traceGrid = document.getElementById('traceGrid');
       traceGrid.innerHTML = '';
-  
+
       for (let i = 0; i < questions.length; i++) {
         const traceItem = document.createElement('div');
         traceItem.className = 'trace-item';
@@ -203,7 +209,7 @@
         traceGrid.appendChild(traceItem);
       }
     }
-  
+
     function updateTraceItem(index) {
       const traceItems = document.querySelectorAll('.trace-item');
       if (index >= 0 && index < traceItems.length) {
@@ -214,7 +220,6 @@
         }
       }
     }
-  
 
     function updateTraceHighlight() {
       const traceItems = document.querySelectorAll('.trace-item');
@@ -222,7 +227,7 @@
         item.classList.toggle('current', i === currentQuestionIndex);
       });
     }
-  
+
     function navigateQuestion(direction) {
       if (direction === 'prev' && currentQuestionIndex > 0) {
         currentQuestionIndex--;
@@ -231,7 +236,7 @@
       }
       displayQuestion(currentQuestionIndex);
     }
-  
+
     function startTimer() {
       clearInterval(timerInterval);
       timerInterval = setInterval(() => {
@@ -239,8 +244,15 @@
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
           timeLeft = 0;
-          isTimeUp = true; 
+          isTimeUp = true;
           updateTimer();
+          
+          for (let i = 0; i < answers.length; i++) {
+            if (answers[i] === null) {
+              answers[i] = -1;
+            }
+          }
+          saveAnswersToCookie();
           alert('Hết thời gian làm bài!');
           window.location.href = 'after.html';
           return;
@@ -248,22 +260,22 @@
         updateTimer();
       }, 1000);
     }
-  
+
     function updateTimer() {
       const hours = Math.floor(timeLeft / 3600);
       const minutes = Math.floor((timeLeft % 3600) / 60);
       const seconds = timeLeft % 60;
-  
+
       document.getElementById('timer').textContent =
         `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  
+
       const progressPercent = ((totalTime - timeLeft) / totalTime) * 100;
       document.getElementById('timerProgress').style.width = `${progressPercent}%`;
     }
-  
+
     function saveAnswersToCookie() {
       const answeredQuestions = [];
-  
+
       for (let i = 0; i < questions.length; i++) {
         if (answers[i] !== null) {
           answeredQuestions.push({
@@ -273,10 +285,10 @@
           });
         }
       }
-  
+
       setCookie('answeredQuestions', JSON.stringify(answeredQuestions), 1);
     }
-  
+
     function loadAnswersFromCookie() {
       const savedAnswers = getCookie('answeredQuestions');
       if (savedAnswers) {
@@ -293,13 +305,13 @@
         }
       }
     }
-  
+
     document.getElementById('prevBtn').addEventListener('click', () => navigateQuestion('prev'));
     document.getElementById('nextBtn').addEventListener('click', () => navigateQuestion('next'));
-  
+
     document.addEventListener('DOMContentLoaded', fetchQuestions);
   </script>
-  
+
 </body>
 
 </html>

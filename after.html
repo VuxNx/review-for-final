@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&family=Tektur:wght@400..900&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/after.css" />
+    <title>Kết Quả Bài Thi</title>
+</head>
+
+<body>
+    <div class="timer-container">
+        <div class="timer-box">
+            <h3>Kết Quả Bài Thi</h3>
+            <div id="scoreDisplay">Đang tính điểm...</div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div id="resultsContainer">
+        </div>
+    </div>
+
+    <div class="trace-container">
+        <div class="trace-box">
+            <h3 class="trace-title">Bảng Theo Dõi</h3>
+            <div class="trace-grid" id="traceGrid">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mảng các API key
+        const API_KEYS = [
+            "AIzaSyB1V-g3w69Mnuj_9S6h-T_YK6SzEW8Gf0I",
+            "AIzaSyAr5-k4a11f7rukuoZvRxDFMZ4tkvRiEnA",
+            "AIzaSyCrOYIHrAy5YyJRI_TCUR5eJGQuYmMA1yM",
+            "AIzaSyC4O2uASupbgnnPAs_5uPm7CaRhk6bFciE",
+            "AIzaSyCXhokaIWJwgbuMcClxIjt6ywSVGkSNrkY",
+            "AIzaSyBxjXSyQ73B53ruDmGKV3QFc2BrlMoR8Pc",
+            "AIzaSyCMNdvwOZqWnDH8P-fY4kJIZwWrx6R-R64",
+            "AIzaSyAnZCJIOz8pXtivzazfJHCWzgsCe8RsxZY",
+            "AIzaSyBB1WcU-jcEc3zcjf2x27r9LhYo1QnySIg",
+        ];
+
+
+        function getRandomAPIKey() {
+            return API_KEYS[Math.floor(Math.random() * API_KEYS.length)];
+        }
+
+
+        function getCookie(name) {
+            const value = "; " + document.cookie;
+            const parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+            return null;
+        }
+
+        async function loadResults() {
+            const chapter = getCookie('Chapter') || '1';
+            const answeredQuestionsCookie = getCookie('answeredQuestions');
+            const questionListCookie = getCookie('questionList');
+
+            if (!answeredQuestionsCookie || !questionListCookie) {
+                document.getElementById('resultsContainer').textContent = "Không có dữ liệu kết quả!";
+                return;
+            }
+
+            let answeredQuestions = JSON.parse(answeredQuestionsCookie);
+            let questionList = JSON.parse(questionListCookie);
+
+            const filename = `static/question/ch${chapter}.json`;
+
+            try {
+                const response = await fetch(filename);
+                const jsonData = await response.json();
+
+                let examResults = [];
+                questionList.forEach(id => {
+                    let questionData = jsonData[String(id)];
+                    if (questionData) {
+                        let correctIndex = questionData.answer.indexOf(questionData.correct);
+                        let answerObj = answeredQuestions.find(item => item.id === id);
+                        examResults.push({
+                            id: id,
+                            question: questionData.question,
+                            options: questionData.answer,
+                            correctAnswer: correctIndex,
+                            userAnswer: answerObj ? answerObj.userAnswer : -1,
+                            explanation: questionData.explanation || ""
+                        });
+                    }
+                });
+
+                displayScore(examResults);
+                displayResults(examResults);
+                displayTrace(examResults);
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu câu hỏi:", error);
+                document.getElementById('resultsContainer').textContent = "Có lỗi xảy ra khi tải kết quả. Vui lòng thử lại sau.";
+            }
+        }
+
+        function displayScore(results) {
+            let correctCount = results.filter(item => item.userAnswer === item.correctAnswer).length;
+            document.getElementById('scoreDisplay').textContent = `Bạn trả lời đúng ${correctCount} / ${results.length} câu`;
+        }
+
+
+        function fetchExplanation(promptText, explanationBox, isUnanswered = false) {
+            const randomKey = getRandomAPIKey();
+            fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + randomKey, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{ text: promptText }]
+                    }]
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (
+                        data &&
+                        data.candidates &&
+                        data.candidates[0] &&
+                        data.candidates[0].content &&
+                        data.candidates[0].content.parts &&
+                        data.candidates[0].content.parts[0] &&
+                        data.candidates[0].content.parts[0].text
+                    ) {
+                        let explanationText = data.candidates[0].content.parts[0].text;
+                        if (isUnanswered) {
+                            explanationBox.textContent = "Giải thích: Câu này chưa được chọn. " + explanationText;
+                        } else {
+                            explanationBox.textContent = "Giải thích: " + explanationText;
+                        }
+                    } else {
+                        explanationBox.textContent = "Giải thích: Không có phản hồi từ hệ thống.";
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi khi fetch lời giải thích:", error);
+                    explanationBox.textContent = "Giải thích: Không thể lấy lời giải thích.";
+                });
+        }
+
+        function displayResults(results) {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = "";
+
+            results.forEach((item, index) => {
+                let questionBox = document.createElement('div');
+                questionBox.className = "question-box";
+                questionBox.id = `question-${index + 1}`; 
+                questionBox.style.marginBottom = "20px";
+
+                let title = document.createElement('h2');
+                title.className = "question-title";
+                title.textContent = `Câu ${index + 1}`;
+                questionBox.appendChild(title);
+
+                let content = document.createElement('div');
+                content.className = "question-content";
+                content.textContent = item.question;
+                questionBox.appendChild(content);
+
+                let optionsContainer = document.createElement('div');
+                optionsContainer.className = "options";
+                item.options.forEach((option, i) => {
+                    let optionDiv = document.createElement('div');
+                    optionDiv.className = "option";
+                    optionDiv.textContent = `${String.fromCharCode(65 + i)}. ${option}`;
+
+                    if (item.userAnswer === -1) {
+                        if (i === item.correctAnswer) {
+                            optionDiv.classList.add('correct-result');
+                        }
+                    } else {
+                        if (i === item.correctAnswer) {
+                            optionDiv.classList.add('correct-result');
+                        }
+                        if (i === item.userAnswer) {
+                            if (item.userAnswer === item.correctAnswer) {
+                                optionDiv.classList.add('selected');
+                            } else {
+                                optionDiv.classList.add('incorrect-result');
+                            }
+                        }
+                    }
+
+                    optionsContainer.appendChild(optionDiv);
+                });
+                questionBox.appendChild(optionsContainer);
+
+
+                if (item.userAnswer !== item.correctAnswer) {
+                    let explanationBtn = document.createElement('button');
+                    explanationBtn.textContent = "Giải thích";
+                    explanationBtn.className = "explain-btn";
+                    questionBox.appendChild(explanationBtn);
+
+                    explanationBtn.addEventListener('click', () => {
+                        explanationBtn.style.display = "none";
+                        let explanationBox = document.createElement('div');
+                        explanationBox.className = "explanation-box";
+                        questionBox.appendChild(explanationBox);
+
+                        let promptText = "";
+                        let isUnanswered = false;
+                        if (item.userAnswer !== -1) {
+                            promptText = "Tại sao " + item.question + " lại là: " + item.options[item.correctAnswer] +
+                                " mà không phải là " + item.options[item.userAnswer] +
+                                "? Hãy giải thích chi tiết trong 25 - 30 từ. Chỉ cần 1 đoạn văn.";
+                        } else {
+                            promptText = "Tại sao " + item.question + " lại là: " + item.options[item.correctAnswer] +
+                                "? Hãy giải thích chi tiết trong 25 - 30 từ. Chỉ cần 1 đoạn văn.";
+                            isUnanswered = true;
+                        }
+                        fetchExplanation(promptText, explanationBox, isUnanswered);
+                    });
+                }
+
+                container.appendChild(questionBox);
+            });
+        }
+
+        function displayTrace(results) {
+            const traceGrid = document.getElementById('traceGrid');
+            traceGrid.innerHTML = "";
+            
+            results.forEach((item, index) => {
+                let traceItem = document.createElement('div');
+                traceItem.className = "trace-item";
+                traceItem.textContent = index + 1;
+                traceItem.setAttribute('data-question', index + 1);
+                
+                if (item.userAnswer === -1) {
+                    traceItem.classList.add('unanswered');
+                } else if (item.userAnswer === item.correctAnswer) {
+                    traceItem.classList.add('correct');
+                } else {
+                    traceItem.classList.add('incorrect');
+                }
+                
+                
+                traceItem.style.cursor = 'pointer';
+                
+                traceItem.addEventListener('click', () => {
+                    const questionElement = document.getElementById(`question-${index + 1}`);
+                    
+                    if (questionElement) {
+                        
+                        questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                        
+                        questionElement.style.transition = 'background-color 0.5s';
+                        questionElement.style.backgroundColor = '#fffde7';
+                
+                        setTimeout(() => {
+                            questionElement.style.backgroundColor = '';
+                        }, 1500);
+                    }
+                });
+                
+                traceGrid.appendChild(traceItem);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadResults);
+    </script>
+</body>
+
+</html>
