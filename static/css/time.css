@@ -19,7 +19,6 @@ body {
     padding: 10px;
 }
 
-/* Căn giữa FlipClock */
 #clock {
     display: flex;
     justify-content: center;
