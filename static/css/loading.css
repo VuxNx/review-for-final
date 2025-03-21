@@ -1,6 +1,6 @@
 /* Toàn bộ trang: căn giữa nội dung */
 html, body {
-  background: url('../image/bg_intro.jpg') no-repeat center center fixed;
+  background: url('../image/loading.png') no-repeat center center fixed;
   margin: 0;
   padding: 0;
   height: 100%;
