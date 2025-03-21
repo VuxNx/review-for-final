@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rolling Film Credits</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            background: black;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Tektur', sans-serif;
+            font-weight: 500;
+        }
+
+        .credits-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .intro {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 5vw;
+            z-index: 2;
+            white-space: nowrap;
+            animation: slideLeft 3s forwards;
+            animation-delay: 1s;
+        }
+
+        @keyframes slideLeft {
+            0% {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-337%, -50%);
+                opacity: 1;
+            }
+        }
+
+        .credits {
+            position: absolute;
+            bottom: -100%;
+            width: 100%;
+            text-align: center;
+            color: #fff;
+            font-size: 3vw;
+            animation: rollCredits 20s linear infinite;
+            left: 10%;
+        }
+
+        .credits hr {
+            width: 75%;
+            border: none;
+            border-top: 2px solid #fff;
+            margin: 2vh auto;
+        }
+
+        @keyframes rollCredits {
+            0% {
+                bottom: -100%;
+            }
+            100% {
+                bottom: 100%;
+            }
+        }
+
+        .credits p {
+            margin: 2vh 0;
+        }
+
+        .go-to-main {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
+            background: transparent;
+            border: 3px solid white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .go-to-main:hover {
+            background: white;
+            color: black;
+        }
+
+        @media (max-width: 768px) {
+            .intro {
+                font-size: 5vw;
+            }
+            .credits {
+                font-size: 4vw;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .intro {
+                font-size: 7vw;
+            }
+            .credits {
+                font-size: 5vw;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="credits-container">
+        <div class="intro">Credit</div>
+        <div class="credits">
+            <p></p>
+            <p></p>
+            <hr>
+            <p>Thank you to all the team members:</p>
+            <p>Vu Trong Nghia</p>
+            <p>Le Thanh Nghia</p>
+            <p>Hoang Quynh Phuong</p>
+            <p>Ho Anh Dung</p>
+            <hr>
+            <p>Special Thanks:</p>
+            <p>Instructor: Pham Thi Minh Thai</p>
+            <p>Reviewer: Ngo Dieu Vy, Tran Anh Khoa</p>
+            <hr>
+        </div>
+    </div>
+
+    <button class="go-to-main" onclick="goToMain()">Go to Main</button>
+
+    <script>
+        function goToMain() {
+            window.location.href = "intro.html";
+        }
+    </script>
+
+</body>
+
+</html>
