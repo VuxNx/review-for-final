@@ -19,6 +19,7 @@
             <h3>Kết Quả Bài Thi</h3>
             <div id="scoreDisplay">Đang tính điểm...</div>
         </div>
+        <button class="explain-btn" onclick="clearCookiesAndGoToMain()">Go to Main</button>
     </div>
 
     <div class="main-container">
@@ -35,7 +36,6 @@
     </div>
 
     <script>
-        // Mảng các API key
         const API_KEYS = [
             "AIzaSyB1V-g3w69Mnuj_9S6h-T_YK6SzEW8Gf0I",
             "AIzaSyAr5-k4a11f7rukuoZvRxDFMZ4tkvRiEnA",
@@ -49,11 +49,9 @@
             "AIzaSyDaNhcnaUO9__pEL3Ms1nWkm3-6iKMM7O4"
         ];
 
-
         function getRandomAPIKey() {
             return API_KEYS[Math.floor(Math.random() * API_KEYS.length)];
         }
-
 
         function getCookie(name) {
             const value = "; " + document.cookie;
@@ -112,7 +110,6 @@
             document.getElementById('scoreDisplay').textContent = `Bạn trả lời đúng ${correctCount} / ${results.length} câu`;
         }
 
-
         function fetchExplanation(promptText, explanationBox, isUnanswered = false) {
             const randomKey = getRandomAPIKey();
             fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + randomKey, {
@@ -160,7 +157,7 @@
             results.forEach((item, index) => {
                 let questionBox = document.createElement('div');
                 questionBox.className = "question-box";
-                questionBox.id = `question-${index + 1}`; 
+                questionBox.id = `question-${index + 1}`;
                 questionBox.style.marginBottom = "20px";
 
                 let title = document.createElement('h2');
@@ -201,7 +198,6 @@
                 });
                 questionBox.appendChild(optionsContainer);
 
-
                 if (item.userAnswer !== item.correctAnswer) {
                     let explanationBtn = document.createElement('button');
                     explanationBtn.textContent = "Giải thích";
@@ -236,13 +232,13 @@
         function displayTrace(results) {
             const traceGrid = document.getElementById('traceGrid');
             traceGrid.innerHTML = "";
-            
+
             results.forEach((item, index) => {
                 let traceItem = document.createElement('div');
                 traceItem.className = "trace-item";
                 traceItem.textContent = index + 1;
                 traceItem.setAttribute('data-question', index + 1);
-                
+
                 if (item.userAnswer === -1) {
                     traceItem.classList.add('unanswered');
                 } else if (item.userAnswer === item.correctAnswer) {
@@ -250,32 +246,37 @@
                 } else {
                     traceItem.classList.add('incorrect');
                 }
-                
-                
+
                 traceItem.style.cursor = 'pointer';
-                
+
                 traceItem.addEventListener('click', () => {
                     const questionElement = document.getElementById(`question-${index + 1}`);
-                    
+
                     if (questionElement) {
-                        
                         questionElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                        
                         questionElement.style.transition = 'background-color 0.5s';
                         questionElement.style.backgroundColor = '#fffde7';
-                
                         setTimeout(() => {
                             questionElement.style.backgroundColor = '';
                         }, 1500);
                     }
                 });
-                
+
                 traceGrid.appendChild(traceItem);
             });
         }
 
         document.addEventListener('DOMContentLoaded', loadResults);
+
+        function clearCookiesAndGoToMain() {
+            const cookiesToClear = ["Chapter", "QuestionCount", "savedTime", "questionList", "answeredQuestions"];
+            cookiesToClear.forEach(cookie => {
+                document.cookie = cookie + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            });
+            setTimeout(function() {
+                window.location.href = "intro.html";
+            }, 300);
+        }
     </script>
 </body>
 

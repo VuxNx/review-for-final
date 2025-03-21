@@ -150,7 +150,15 @@
 
     <script>
         function goToMain() {
+            clearCookies();
             window.location.href = "intro.html";
+        }
+
+        function clearCookies() {
+            const cookiesToClear = ["Chapter", "QuestionCount", "savedTime", "questionList", "answeredQuestions"];
+            cookiesToClear.forEach(cookie => {
+                document.cookie = `${cookie}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+            });
         }
     </script>
 

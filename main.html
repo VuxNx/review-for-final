@@ -21,6 +21,7 @@
       <div class="progress-bar">
         <div class="progress" id="timerProgress"></div>
       </div>
+      <button class="btn submit-btn" id="submitBtn">Nộp bài</button>
     </div>
   </div>
 
@@ -47,7 +48,7 @@
 
   <script>
     let questions = [];
-    let questionList = []; 
+    let questionList = [];
     let currentQuestionIndex = 0;
     let answers = [];
     let timeLeft = 0;
@@ -73,7 +74,7 @@
       try {
         const chapter = getCookie('Chapter') || '1';
         const questionCount = parseInt(getCookie('QuestionCount') || '30', 10);
-        const savedTime = parseInt(getCookie('savedTime') || '3600', 10); 
+        const savedTime = parseInt(getCookie('savedTime') || '3600', 10);
 
         timeLeft = savedTime;
         totalTime = savedTime;
@@ -246,7 +247,7 @@
           timeLeft = 0;
           isTimeUp = true;
           updateTimer();
-          
+
           for (let i = 0; i < answers.length; i++) {
             if (answers[i] === null) {
               answers[i] = -1;
@@ -310,6 +311,19 @@
     document.getElementById('nextBtn').addEventListener('click', () => navigateQuestion('next'));
 
     document.addEventListener('DOMContentLoaded', fetchQuestions);
+    document.getElementById('submitBtn').addEventListener('click', () => {
+      const confirmSubmit = confirm("Bạn có chắc chắn muốn nộp bài không?");
+      if (confirmSubmit) {
+        for (let i = 0; i < answers.length; i++) {
+          if (answers[i] === null) {
+            answers[i] = -1;
+          }
+        }
+        saveAnswersToCookie();
+        window.location.href = 'after.html';
+      }
+    });
+
   </script>
 
 </body>
