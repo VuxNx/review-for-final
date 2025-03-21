@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <title>Chủ Nghĩa Xã Hội Khoa Học</title>
@@ -12,7 +13,7 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container" id="container">
         <div class="progress-bar">
             <div class="progress-fill" id="progress-fill"></div>
         </div>
@@ -23,6 +24,8 @@
         let width = 0;
         const fillElem = document.getElementById('progress-fill');
         const textElem = document.getElementById('progress-text');
+        const container = document.getElementById('container');
+
         wait(900);
         function wait(ms) {
             var d = new Date();
@@ -30,10 +33,13 @@
             do { d2 = new Date(); }
             while (d2 - d < ms);
         }
-
         const interval = setInterval(() => {
             if (width >= 100) {
                 clearInterval(interval);
+                container.classList.add('slide-out');
+                setTimeout(() => {
+                    window.location.href = 'main.html';
+                }, 500);
             } else {
                 width++;
                 fillElem.style.width = width + '%';
@@ -42,4 +48,5 @@
         }, 50);
     </script>
 </body>
+
 </html>

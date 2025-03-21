@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="static/css/main.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&family=Tektur:wght@400..900&display=swap"
+    rel="stylesheet" />
+  <title>Trang Trắc Nghiệm</title>
+</head>
+
+<body>
+  <div class="timer-container">
+    <div class="timer-box">
+      <h3>Thời gian còn lại</h3>
+      <div class="timer" id="timer">00:00:16</div>
+      <div class="progress-bar">
+        <div class="progress" id="timerProgress"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-container">
+    <div class="question-box">
+      <h2 class="question-title">Câu hỏi <span id="currentQuestion">1</span>/<span id="totalQuestions">30</span></h2>
+      <div class="question-content" id="questionContent">Đang tải câu hỏi...</div>
+      <div class="options" id="options">
+      </div>
+      <div class="navigation">
+        <button class="btn" id="prevBtn" disabled>Câu trước</button>
+        <button class="btn" id="nextBtn">Câu tiếp theo</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="trace-container">
+    <div class="trace-box">
+      <h3 class="trace-title">Bảng Theo Dõi</h3>
+      <div class="trace-grid" id="traceGrid">
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let questions = [];
+    let currentQuestionIndex = 0;
+    let answers = [];
+    let timeLeft = 0;
+    let timerInterval;
+    let totalTime = 0;
+    let isTimeUp = false; 
+  
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+      return null;
+    }
+  
+    function setCookie(name, value, days) {
+      const date = new Date();
+      date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+      const expires = `expires=${date.toUTCString()}`;
+      document.cookie = `${name}=${value};${expires};path=/`;
+    }
+  
+    async function fetchQuestions() {
+      try {
+        const chapter = getCookie('Chapter') || '1';
+        const questionCount = parseInt(getCookie('QuestionCount') || '30', 10);
+        const savedTime = parseInt(getCookie('savedTime') || '3600', 10); // Mặc định 1 giờ
+  
+        timeLeft = savedTime;
+        totalTime = savedTime;
+        updateTimer();
+  
+        const filename = `static/question/ch${chapter}.json`;
+        const response = await fetch(filename);
+        const jsonData = await response.json();
+  
+        const questionArray = [];
+        for (const id in jsonData) {
+          if (jsonData.hasOwnProperty(id)) {
+            const q = jsonData[id];
+            questionArray.push({
+              id: parseInt(id),
+              question: q.question,
+              options: q.answer,
+              correctAnswer: q.answer.indexOf(q.correct)
+            });
+          }
+        }
+  
+        questionArray.sort(() => Math.random() - 0.5);
+        questions = questionArray.slice(0, Math.min(questionCount, questionArray.length));
+  
+        while (questions.length < questionCount) {
+          const id = questions.length + 1;
+          questions.push({
+            id: id,
+            question: `Câu hỏi bổ sung ${id} của chương ${chapter}`,
+            options: [
+              `Đáp án A`,
+              `Đáp án B`,
+              `Đáp án C`,
+              `Đáp án D`
+            ],
+            correctAnswer: Math.floor(Math.random() * 4)
+          });
+        }
+  
+        answers = new Array(questions.length).fill(null);
+  
+        loadAnswersFromCookie();
+  
+        document.getElementById('totalQuestions').textContent = questions.length;
+  
+        createTraceGrid();
+  
+        displayQuestion(currentQuestionIndex);
+  
+        startTimer();
+      } catch (error) {
+        console.error('Lỗi khi tải câu hỏi:', error);
+        document.getElementById('questionContent').textContent = 'Có lỗi xảy ra khi tải câu hỏi. Vui lòng thử lại sau.';
+      }
+    }
+  
+    function displayQuestion(index) {
+      if (index < 0 || index >= questions.length) return;
+  
+      const question = questions[index];
+      document.getElementById('currentQuestion').textContent = index + 1;
+      document.getElementById('questionContent').textContent = question.question;
+  
+      const optionsContainer = document.getElementById('options');
+      optionsContainer.innerHTML = '';
+  
+      question.options.forEach((option, i) => {
+        const optionElement = document.createElement('div');
+        optionElement.className = 'option';
+        if (answers[index] === i) {
+          optionElement.classList.add('selected');
+        }
+        optionElement.textContent = `${String.fromCharCode(65 + i)}. ${option}`;
+
+        optionElement.addEventListener('click', () => {
+          if (!isTimeUp) {
+            selectOption(i);
+          }
+        });
+        optionsContainer.appendChild(optionElement);
+      });
+  
+      document.getElementById('prevBtn').disabled = index === 0;
+      document.getElementById('nextBtn').disabled = index === questions.length - 1;
+  
+      updateTraceHighlight();
+    }
+  
+    function selectOption(optionIndex) {
+      if (isTimeUp) return;
+  
+      answers[currentQuestionIndex] = optionIndex;
+  
+      const options = document.querySelectorAll('.option');
+      options.forEach((option, i) => {
+        option.classList.remove('selected');
+        if (i === optionIndex) {
+          option.classList.add('selected');
+        }
+      });
+  
+      updateTraceItem(currentQuestionIndex);
+  
+      saveAnswersToCookie();
+    }
+  
+    function createTraceGrid() {
+      const traceGrid = document.getElementById('traceGrid');
+      traceGrid.innerHTML = '';
+  
+      for (let i = 0; i < questions.length; i++) {
+        const traceItem = document.createElement('div');
+        traceItem.className = 'trace-item';
+        if (answers[i] !== null) {
+          traceItem.classList.add('answered');
+        }
+        if (i === currentQuestionIndex) {
+          traceItem.classList.add('current');
+        }
+        traceItem.textContent = i + 1;
+        traceItem.addEventListener('click', () => {
+          if (!isTimeUp) {
+            currentQuestionIndex = i;
+            displayQuestion(i);
+          }
+        });
+        traceGrid.appendChild(traceItem);
+      }
+    }
+  
+    function updateTraceItem(index) {
+      const traceItems = document.querySelectorAll('.trace-item');
+      if (index >= 0 && index < traceItems.length) {
+        if (answers[index] !== null) {
+          traceItems[index].classList.add('answered');
+        } else {
+          traceItems[index].classList.remove('answered');
+        }
+      }
+    }
+  
+
+    function updateTraceHighlight() {
+      const traceItems = document.querySelectorAll('.trace-item');
+      traceItems.forEach((item, i) => {
+        item.classList.toggle('current', i === currentQuestionIndex);
+      });
+    }
+  
+    function navigateQuestion(direction) {
+      if (direction === 'prev' && currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+      } else if (direction === 'next' && currentQuestionIndex < questions.length - 1) {
+        currentQuestionIndex++;
+      }
+      displayQuestion(currentQuestionIndex);
+    }
+  
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timeLeft = 0;
+          isTimeUp = true; 
+          updateTimer();
+          alert('Hết thời gian làm bài!');
+          window.location.href = 'after.html';
+          return;
+        }
+        updateTimer();
+      }, 1000);
+    }
+  
+    function updateTimer() {
+      const hours = Math.floor(timeLeft / 3600);
+      const minutes = Math.floor((timeLeft % 3600) / 60);
+      const seconds = timeLeft % 60;
+  
+      document.getElementById('timer').textContent =
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  
+      const progressPercent = ((totalTime - timeLeft) / totalTime) * 100;
+      document.getElementById('timerProgress').style.width = `${progressPercent}%`;
+    }
+  
+    function saveAnswersToCookie() {
+      const answeredQuestions = [];
+  
+      for (let i = 0; i < questions.length; i++) {
+        if (answers[i] !== null) {
+          answeredQuestions.push({
+            id: questions[i].id,
+            correctAnswer: questions[i].correctAnswer,
+            userAnswer: answers[i]
+          });
+        }
+      }
+  
+      setCookie('answeredQuestions', JSON.stringify(answeredQuestions), 1);
+    }
+  
+    function loadAnswersFromCookie() {
+      const savedAnswers = getCookie('answeredQuestions');
+      if (savedAnswers) {
+        try {
+          const parsedAnswers = JSON.parse(savedAnswers);
+          parsedAnswers.forEach(answer => {
+            const questionIndex = questions.findIndex(q => q.id === answer.id);
+            if (questionIndex !== -1) {
+              answers[questionIndex] = answer.userAnswer;
+            }
+          });
+        } catch (error) {
+          console.error('Lỗi khi phân tích dữ liệu cookie:', error);
+        }
+      }
+    }
+  
+    document.getElementById('prevBtn').addEventListener('click', () => navigateQuestion('prev'));
+    document.getElementById('nextBtn').addEventListener('click', () => navigateQuestion('next'));
+  
+    document.addEventListener('DOMContentLoaded', fetchQuestions);
+  </script>
+  
+</body>
+
+</html>
