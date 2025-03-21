@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <title>Fake Loading Progress Bar</title>
-    <!-- Kết nối đến file CSS -->
-    <link rel="stylesheet" href="loading.css" />
+    <link rel="stylesheet" href="static/css/loading.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -20,7 +19,6 @@
         <div class="progress-text" id="progress-text">0%</div>
     </div>
 
-    <!-- Code JS nhỏ để mô phỏng tăng dần từ 0% đến 100% -->
     <script>
         let width = 0;
         const fillElem = document.getElementById('progress-fill');
@@ -32,7 +30,7 @@
             do { d2 = new Date(); }
             while (d2 - d < ms);
         }
-        // Cứ 50ms lại tăng 1%, đến 100% thì dừng
+
         const interval = setInterval(() => {
             if (width >= 100) {
                 clearInterval(interval);
