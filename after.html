@@ -46,7 +46,10 @@
             "AIzaSyCMNdvwOZqWnDH8P-fY4kJIZwWrx6R-R64",
             "AIzaSyAnZCJIOz8pXtivzazfJHCWzgsCe8RsxZY",
             "AIzaSyBB1WcU-jcEc3zcjf2x27r9LhYo1QnySIg",
-            "AIzaSyDaNhcnaUO9__pEL3Ms1nWkm3-6iKMM7O4"
+            "AIzaSyDaNhcnaUO9__pEL3Ms1nWkm3-6iKMM7O4",
+            "AIzaSyBO1tcMs_6Qku1HEHYUdRVVpHp7gXOUNLk",
+            "AIzaSyDv_t4vJA6gH3QNWWgKnyW3o7ImSql6Gi8",
+            "AIzaSyDjT_3YFwx3K9l6Bk9_uTWJy8NErxn2rfA",
         ];
 
         function getRandomAPIKey() {
@@ -215,10 +218,10 @@
                         if (item.userAnswer !== -1) {
                             promptText = "Tại sao " + item.question + " lại là: " + item.options[item.correctAnswer] +
                                 " mà không phải là " + item.options[item.userAnswer] +
-                                "? Hãy giải thích chi tiết trong 25 - 30 từ. Chỉ cần 1 đoạn văn.";
+                                "? Hãy giải thích chi tiết trong 35 - 45 từ. Chỉ cần 1 đoạn văn, với tư cách một giáo viên Việt Nam dạy môn Chủ Nghĩa Xã Hội Khoa học.";
                         } else {
                             promptText = "Tại sao " + item.question + " lại là: " + item.options[item.correctAnswer] +
-                                "? Hãy giải thích chi tiết trong 25 - 30 từ. Chỉ cần 1 đoạn văn.";
+                                "? Hãy giải thích chi tiết trong 35 - 45 từ. Chỉ cần 1 đoạn văn, với tư cách một giáo viên Việt Nam dạy môn Chủ Nghĩa Xã Hội Khoa học.";
                             isUnanswered = true;
                         }
                         fetchExplanation(promptText, explanationBox, isUnanswered);
